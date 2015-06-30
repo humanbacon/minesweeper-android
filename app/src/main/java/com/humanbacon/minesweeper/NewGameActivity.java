@@ -36,17 +36,17 @@ public class NewGameActivity extends Activity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
 
-        Button[][] tableCells = new Button[8][8];
+        Button[][] tableCells = new Button[9][9];
 
         ClassicGame classicGame = new ClassicGame();
         ClassicGame.GameBoard gameBoard = classicGame.getGameBoard();
 
-        TableRow[] tableRows = new TableRow[8];
+        TableRow[] tableRows = new TableRow[9];
         for (int j = 0; j < tableCells.length; j++) {
             TableRow row = new TableRow(this);
             for (int i = 0; i < tableCells[j].length; i++) {
                 tableCells[i][j] = new Button(this);
-                tableCells[i][j].setLayoutParams(new TableRow.LayoutParams(120, 120));
+                tableCells[i][j].setLayoutParams(new TableRow.LayoutParams(110, 110));
                 tableCells[i][j].setText("" + gameBoard.getCell(i, j).getContent());
                 row.addView(tableCells[i][j]);
             }

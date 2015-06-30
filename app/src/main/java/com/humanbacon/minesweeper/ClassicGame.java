@@ -139,7 +139,7 @@ public class ClassicGame {
         }
 
         public GameBoard(){
-            this(8, 8, 10);
+            this(9, 9, 10);
         }
 
 		public Cell getN(Cell cell){
