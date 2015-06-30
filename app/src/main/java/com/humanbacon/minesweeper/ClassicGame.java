@@ -1,5 +1,6 @@
 package com.humanbacon.minesweeper;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Scanner;
@@ -18,7 +19,13 @@ public class ClassicGame {
 	protected int height;
 	protected int mineNo;	
 
-	private GameTimer timer = new GameTimer();
+	protected GameTimer gameTimer;
+    protected GameBoard gameBoard;
+
+	public ClassicGame(){
+		gameTimer = new GameTimer();
+        gameBoard = new GameBoard();
+	}
 
 	class GameTimer{
 
@@ -90,62 +97,218 @@ public class ClassicGame {
 		public int getTime(){
 			return time;
 		}
+	}
 
-		class GameBoard{
-			private int width;
-			private int height;
-			private int mineNo;
-			private Cell[][] board;			
+	class GameBoard{
+		private int width;
+		private int height;
+		private int mineNo;
+		private Cell[][] board;
 
-			public GameBoard(int w, int h, int m){
-				width = w;
-				height = h;
-				mineNo = m;
-				for(int j = 0; j < height; j++){
-					for(int i = 0; i < width; i++){
-						board[i][j] = new Cell();
-					}
-				}
-			}
+        public GameBoard(int w, int h, int m){
+            width = w;
+            height = h;
+            mineNo = m;
+            board = new Cell[width][height];
+            for(int j = 0; j < height; j++){
+                for(int i = 0; i < width; i++){
+                    board[i][j] = new Cell(i, j);
+                }
+            }
+            Random rand = new Random();
+            for(int assignedMineNum = 0; assignedMineNum < m; ) {
+                int x = rand.nextInt(width);
+                int y = rand.nextInt(height);
+                if(board[x][y].getContent() == 0){
+                    board[x][y].setContent(MINE);
+                    assignedMineNum++;
+                }
+            }
+            for(int j = 0; j < height; j++){
+                for(int i = 0; i < width; i++){
+                    if(board[i][j].getContent() == MINE){
+                        Cell[] neighbors = getNeighbors(board[i][j]);
+                        for(Cell cell : neighbors){
+                            if(cell.getContent() != MINE){
+                                cell.setContent(cell.getContent() + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-			public GameBoard(){
-				this(9, 9, 10);
-			}
+        public GameBoard(){
+            this(8, 8, 10);
+        }
 
+		public Cell getN(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+			if(y != 0){
+                return board[x][y - 1];
+            }else{
+                return null;
+            }
 		}
 
-		class Cell{
+        public Cell getE(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x != width - 1){
+                return board[x + 1][y];
+            }else{
+                return null;
+            }
+        }
 
-			private int state;
-			private int content;
-			public Cell(){
-				state = UNKNOWN;
-				content = -1;
-			}			
+        public Cell getW(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x != 0){
+                return board[x - 1][y];
+            }else{
+                return null;
+            }
+        }
 
-			public void setKnown(){
-				state = KNOWN;
-			}
+        public Cell getS(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(y != height - 1){
+                return board[x][y + 1];
+            }else{
+                return null;
+            }
+        }
 
-			public void setFlag(){
-				state = FLAG;
-			}
+        public Cell getNW(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x != 0 && y != 0){
+                return board[x - 1][y - 1];
+            }else {
+                return null;
+            }
+        }
 
-			public void setQuestion(){
-				state = QUESTION;
-			}
+        public Cell getNE(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x != width - 1 && y != 0){
+                return board[x + 1][y - 1];
+            }else {
+                return null;
+            }
+        }
 
-			public void setContent(int c){
-				if(c <= 0 && c >= 9){
-					content = c;
-				}else{
-					System.err.println("Ivalid content");
-				}				
-			}
+        public Cell getSE(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x != width - 1 && y != height - 1){
+                return board[x + 1][y + 1];
+            }else {
+                return null;
+            }
+        }
 
+        public Cell getSW(Cell cell){
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x != 0 && y != height - 1){
+                return board[x - 1][y + 1];
+            }else {
+                return null;
+            }
+        }
+
+        public Cell[] getNeighbors(Cell cell){
+            Cell[] cells;
+            int x = cell.getX();
+            int y = cell.getY();
+            if(x == 0 && y == 0){
+                return new Cell[] {getE(cell), getSE(cell), getS(cell)};
+            }else if(x == width - 1 && y == 0){
+                return new Cell[] {getS(cell), getSW(cell), getW(cell)};
+            }else if(x == width - 1 && y == height - 1){
+                return new Cell[] {getW(cell), getNW(cell), getN(cell)};
+            }else if(x == 0 && y == height - 1){
+                return new Cell[] {getN(cell), getNE(cell), getE(cell)};
+            }else if(y == 0){
+                return new Cell[] {getE(cell), getSE(cell), getS(cell), getSW(cell), getW(cell)};
+            }else if(x == width - 1){
+                return new Cell[] {getS(cell), getSW(cell), getW(cell), getNW(cell), getN(cell)};
+            }else if(y == height - 1){
+                return new Cell[] {getW(cell), getNW(cell), getN(cell), getNW(cell), getE(cell)};
+            }else if (x == 0) {
+                return new Cell[] {getN(cell), getNW(cell), getE(cell), getSE(cell), getS(cell)};
+            }else{
+                return new Cell[] {getN(cell), getNE(cell), getE(cell), getSE(cell), getS(cell), getSW(cell), getW(cell), getNW(cell)};
+            }
+        }
+
+        public Cell getCell(int x, int y){
+            return board[x][y];
+        }
+	}
+
+	class Cell{
+		private int state;
+		private int content;
+		private int x;
+		private int y;
+		public Cell(int x, int y){
+			this.x = x;
+			this.y = y;
+			state = UNKNOWN;
+			content = 0;
 		}
 
-	}	
+		public void setKnown(){
+			state = KNOWN;
+		}
+
+		public void setFlag(){
+			state = FLAG;
+		}
+
+		public void setQuestion(){
+			state = QUESTION;
+		}
+
+		public void setContent(int c){
+			if(c >= 0 && c <= 9){
+				content = c;
+			}else{
+				System.err.println("Ivalid content");
+			}
+		}
+
+		public int getContent(){
+			return content;
+		}
+
+		public int getState(){
+			return state;
+		}
+
+		public int getX(){
+			return x;
+		}
+
+		public int getY(){
+			return y;
+		}
+
+	}
+
+    public GameTimer getGameTimer(){
+        return gameTimer;
+    }
+
+    public GameBoard getGameBoard(){
+        return gameBoard;
+    }
 
 	public static void main(String[] args){
 		ClassicGame hihi = new ClassicGame();
@@ -154,15 +317,15 @@ public class ClassicGame {
 		do{
 			input = s.next();
 			if(input.equals("show")){
-				System.out.println(hihi.timer.getTime());
+				System.out.println(hihi.gameTimer.getTime());
 			}else if(input.equals("start")){
-				hihi.timer.start();
+				hihi.gameTimer.start();
 			}else if(input.equals("resume")){
-				hihi.timer.resume();
+				hihi.gameTimer.resume();
 			}else if(input.equals("pause")){
-				hihi.timer.pause();
+				hihi.gameTimer.pause();
 			}else if(input.equals("stop")){
-				hihi.timer.stop();
+				hihi.gameTimer.stop();
 			}
 		}while(!input.equals("quit"));
 		System.exit(0);
