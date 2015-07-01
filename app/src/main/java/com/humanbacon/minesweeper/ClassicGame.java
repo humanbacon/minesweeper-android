@@ -1,5 +1,9 @@
 package com.humanbacon.minesweeper;
 
+import android.util.Log;
+
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -276,6 +280,26 @@ public class ClassicGame {
                     return new Cell[] {getN(), getNE(), getE(), getSE(), getS(), getSW(), getW(), getNW()};
                 }
             }
+
+            public void select(){
+                LinkedList<Cell> Q = new LinkedList<Cell>();
+                Q.add(this);
+                this.setKnown();
+                while (Q.size() != 0){
+                    Cell v = Q.remove();
+                    if(this.getContent() == 0) {
+                        for (Cell w : v.getNeighbors()) {
+                            if (w.getState() == UNKNOWN && w.getContent() == 0) {
+                                Q.add(w);
+                                w.setKnown();
+                            }else if(w.getContent() != 0){
+                                w.setKnown();
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         public Cell getCell(int x, int y){

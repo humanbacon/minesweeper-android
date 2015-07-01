@@ -38,8 +38,16 @@ public class NewGameActivity extends Activity {
             this.y = y;
         }
         @Override
-        public void onClick(View cell) {
-            ((Button)cell).setText("" + gameBoard.getCell(x, y).getContent());
+        public void onClick(View v) {
+
+            gameBoard.getCell(x, y).select();
+            for(int j = 0; j < 9; j++){
+                for(int i = 0; i < 9; i++){
+                    if(gameBoard.getCell(i, j).getState() == ClassicGame.KNOWN){
+                        tableCells[i][j].setText("" + gameBoard.getCell(i, j).getContent());
+                    }
+                }
+            }
         }
     }
 
