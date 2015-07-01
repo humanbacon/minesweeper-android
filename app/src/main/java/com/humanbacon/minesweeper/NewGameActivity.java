@@ -25,6 +25,24 @@ import android.widget.TextView;
 
 public class NewGameActivity extends Activity {
 
+    final Button[][] tableCells = new Button[9][9];
+
+    ClassicGame classicGame = new ClassicGame();
+    ClassicGame.GameBoard gameBoard = classicGame.getGameBoard();
+
+    private class CellOnClickListener implements Button.OnClickListener {
+        int x;
+        int y;
+        public CellOnClickListener (int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+        @Override
+        public void onClick(View cell) {
+            ((Button)cell).setText("" + gameBoard.getCell(x, y).getContent());
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,18 +54,14 @@ public class NewGameActivity extends Activity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
 
-        Button[][] tableCells = new Button[9][9];
-
-        ClassicGame classicGame = new ClassicGame();
-        ClassicGame.GameBoard gameBoard = classicGame.getGameBoard();
-
         TableRow[] tableRows = new TableRow[9];
         for (int j = 0; j < tableCells.length; j++) {
             TableRow row = new TableRow(this);
             for (int i = 0; i < tableCells[j].length; i++) {
                 tableCells[i][j] = new Button(this);
                 tableCells[i][j].setLayoutParams(new TableRow.LayoutParams(110, 110));
-                tableCells[i][j].setText("" + gameBoard.getCell(i, j).getContent());
+                tableCells[i][j].setText("");
+                tableCells[i][j].setOnClickListener(new CellOnClickListener(i, j));
                 row.addView(tableCells[i][j]);
             }
             row.setLayoutParams(tableParams);

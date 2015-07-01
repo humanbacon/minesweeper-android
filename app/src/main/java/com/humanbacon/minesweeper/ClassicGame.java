@@ -116,7 +116,7 @@ public class ClassicGame {
                 }
             }
             Random rand = new Random();
-            for(int assignedMineNum = 0; assignedMineNum < m; ) {
+            for(int assignedMineNum = 0; assignedMineNum < m;) {
                 int x = rand.nextInt(width);
                 int y = rand.nextInt(height);
                 if(board[x][y].getContent() == 0){
@@ -241,7 +241,7 @@ public class ClassicGame {
             }else if(y == height - 1){
                 return new Cell[] {getW(cell), getNW(cell), getN(cell), getNW(cell), getE(cell)};
             }else if (x == 0) {
-                return new Cell[] {getN(cell), getNW(cell), getE(cell), getSE(cell), getS(cell)};
+                return new Cell[] {getN(cell), getNE(cell), getE(cell), getSE(cell), getS(cell)};
             }else{
                 return new Cell[] {getN(cell), getNE(cell), getE(cell), getSE(cell), getS(cell), getSW(cell), getW(cell), getNW(cell)};
             }
