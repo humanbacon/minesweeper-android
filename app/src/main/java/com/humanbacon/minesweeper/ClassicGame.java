@@ -127,7 +127,7 @@ public class ClassicGame {
             for(int j = 0; j < height; j++){
                 for(int i = 0; i < width; i++){
                     if(board[i][j].getContent() == MINE){
-                        Cell[] neighbors = getNeighbors(board[i][j]);
+                        Cell[] neighbors = board[i][j].getNeighbors();
                         for(Cell cell : neighbors){
                             if(cell.getContent() != MINE){
                                 cell.setContent(cell.getContent() + 1);
@@ -142,108 +142,139 @@ public class ClassicGame {
             this(9, 9, 10);
         }
 
-		public Cell getN(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-			if(y != 0){
-                return board[x][y - 1];
-            }else{
-                return null;
+        class Cell{
+            private int state;
+            private int content;
+            private int x;
+            private int y;
+            public Cell(int x, int y){
+                this.x = x;
+                this.y = y;
+                state = UNKNOWN;
+                content = 0;
             }
-		}
 
-        public Cell getE(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x != width - 1){
-                return board[x + 1][y];
-            }else{
-                return null;
+            public void setKnown(){
+                state = KNOWN;
             }
-        }
 
-        public Cell getW(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x != 0){
-                return board[x - 1][y];
-            }else{
-                return null;
+            public void setFlag(){
+                state = FLAG;
             }
-        }
 
-        public Cell getS(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(y != height - 1){
-                return board[x][y + 1];
-            }else{
-                return null;
+            public void setQuestion(){
+                state = QUESTION;
             }
-        }
 
-        public Cell getNW(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x != 0 && y != 0){
-                return board[x - 1][y - 1];
-            }else {
-                return null;
+            public void setContent(int c){
+                if(c >= 0 && c <= 9){
+                    content = c;
+                }else{
+                    System.err.println("Ivalid content");
+                }
             }
-        }
 
-        public Cell getNE(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x != width - 1 && y != 0){
-                return board[x + 1][y - 1];
-            }else {
-                return null;
+            public int getContent(){
+                return content;
             }
-        }
 
-        public Cell getSE(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x != width - 1 && y != height - 1){
-                return board[x + 1][y + 1];
-            }else {
-                return null;
+            public int getState(){
+                return state;
             }
-        }
 
-        public Cell getSW(Cell cell){
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x != 0 && y != height - 1){
-                return board[x - 1][y + 1];
-            }else {
-                return null;
+            public int getX(){
+                return x;
             }
-        }
 
-        public Cell[] getNeighbors(Cell cell){
-            Cell[] cells;
-            int x = cell.getX();
-            int y = cell.getY();
-            if(x == 0 && y == 0){
-                return new Cell[] {getE(cell), getSE(cell), getS(cell)};
-            }else if(x == width - 1 && y == 0){
-                return new Cell[] {getS(cell), getSW(cell), getW(cell)};
-            }else if(x == width - 1 && y == height - 1){
-                return new Cell[] {getW(cell), getNW(cell), getN(cell)};
-            }else if(x == 0 && y == height - 1){
-                return new Cell[] {getN(cell), getNE(cell), getE(cell)};
-            }else if(y == 0){
-                return new Cell[] {getE(cell), getSE(cell), getS(cell), getSW(cell), getW(cell)};
-            }else if(x == width - 1){
-                return new Cell[] {getS(cell), getSW(cell), getW(cell), getNW(cell), getN(cell)};
-            }else if(y == height - 1){
-                return new Cell[] {getW(cell), getNW(cell), getN(cell), getNW(cell), getE(cell)};
-            }else if (x == 0) {
-                return new Cell[] {getN(cell), getNE(cell), getE(cell), getSE(cell), getS(cell)};
-            }else{
-                return new Cell[] {getN(cell), getNE(cell), getE(cell), getSE(cell), getS(cell), getSW(cell), getW(cell), getNW(cell)};
+            public int getY(){
+                return y;
+            }
+
+            public Cell getN(){
+                if(y != 0){
+                    return board[x][y - 1];
+                }else{
+                    return null;
+                }
+            }
+
+            public Cell getE(){
+                if(x != width - 1){
+                    return board[x + 1][y];
+                }else{
+                    return null;
+                }
+            }
+
+            public Cell getW(){
+                if(x != 0){
+                    return board[x - 1][y];
+                }else{
+                    return null;
+                }
+            }
+
+            public Cell getS(){
+                if(y != height - 1){
+                    return board[x][y + 1];
+                }else{
+                    return null;
+                }
+            }
+
+            public Cell getNW(){
+                if(x != 0 && y != 0){
+                    return board[x - 1][y - 1];
+                }else {
+                    return null;
+                }
+            }
+
+            public Cell getNE(){
+                if(x != width - 1 && y != 0){
+                    return board[x + 1][y - 1];
+                }else {
+                    return null;
+                }
+            }
+
+            public Cell getSE(){
+                if(x != width - 1 && y != height - 1){
+                    return board[x + 1][y + 1];
+                }else {
+                    return null;
+                }
+            }
+
+            public Cell getSW(){
+                if(x != 0 && y != height - 1){
+                    return board[x - 1][y + 1];
+                }else {
+                    return null;
+                }
+            }
+
+            public Cell[] getNeighbors(){
+                Cell[] cells;
+                if(x == 0 && y == 0){
+                    return new Cell[] {getE(), getSE(), getS()};
+                }else if(x == width - 1 && y == 0){
+                    return new Cell[] {getS(), getSW(), getW()};
+                }else if(x == width - 1 && y == height - 1){
+                    return new Cell[] {getW(), getNW(), getN()};
+                }else if(x == 0 && y == height - 1){
+                    return new Cell[] {getN(), getNE(), getE()};
+                }else if(y == 0){
+                    return new Cell[] {getE(), getSE(), getS(), getSW(), getW()};
+                }else if(x == width - 1){
+                    return new Cell[] {getS(), getSW(), getW(), getNW(), getN()};
+                }else if(y == height - 1){
+                    return new Cell[] {getW(), getNW(), getN(), getNW(), getE()};
+                }else if (x == 0) {
+                    return new Cell[] {getN(), getNE(), getE(), getSE(), getS()};
+                }else{
+                    return new Cell[] {getN(), getNE(), getE(), getSE(), getS(), getSW(), getW(), getNW()};
+                }
             }
         }
 
@@ -252,55 +283,7 @@ public class ClassicGame {
         }
 	}
 
-	class Cell{
-		private int state;
-		private int content;
-		private int x;
-		private int y;
-		public Cell(int x, int y){
-			this.x = x;
-			this.y = y;
-			state = UNKNOWN;
-			content = 0;
-		}
 
-		public void setKnown(){
-			state = KNOWN;
-		}
-
-		public void setFlag(){
-			state = FLAG;
-		}
-
-		public void setQuestion(){
-			state = QUESTION;
-		}
-
-		public void setContent(int c){
-			if(c >= 0 && c <= 9){
-				content = c;
-			}else{
-				System.err.println("Ivalid content");
-			}
-		}
-
-		public int getContent(){
-			return content;
-		}
-
-		public int getState(){
-			return state;
-		}
-
-		public int getX(){
-			return x;
-		}
-
-		public int getY(){
-			return y;
-		}
-
-	}
 
     public GameTimer getGameTimer(){
         return gameTimer;
