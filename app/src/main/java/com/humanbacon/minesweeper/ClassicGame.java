@@ -1,21 +1,16 @@
 package com.humanbacon.minesweeper;
 
-import android.util.Log;
-
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Scanner;
-import java.io.InputStream;
 
 public class ClassicGame {
-	//state
-	public static final int UNKNOWN = 0;
-	public static final int KNOWN = 1;
-	public static final int FLAG = 2;
-	public static final int QUESTION = 3;
+	//mark
+    public static final int UNMARKED = 0;
+    public static final int FLAG = 1;
+	public static final int QUESTION = 2;
 	//content
 	public static final int MINE = 9;
 
@@ -106,13 +101,20 @@ public class ClassicGame {
 	class GameBoard{
 		private int width;
 		private int height;
-		private int mineNo;
+		private int mineCount;
+        private int flagCount;
+        private int correctFlagCount;
+        private int questionCount;
+        private int knowonCount;
 		private Cell[][] board;
 
         public GameBoard(int w, int h, int m){
             width = w;
             height = h;
-            mineNo = m;
+            mineCount = m;
+            flagCount = 0;
+            correctFlagCount = 0;
+            questionCount = 0;
             board = new Cell[width][height];
             for(int j = 0; j < height; j++){
                 for(int i = 0; i < width; i++){
@@ -147,27 +149,21 @@ public class ClassicGame {
         }
 
         class Cell{
-            private int state;
+            private boolean isKnown;
+            private int mark;
             private int content;
             private int x;
             private int y;
             public Cell(int x, int y){
                 this.x = x;
                 this.y = y;
-                state = UNKNOWN;
+                this.isKnown = false;
+                this.mark = UNMARKED;
                 content = 0;
             }
 
             public void setKnown(){
-                state = KNOWN;
-            }
-
-            public void setFlag(){
-                state = FLAG;
-            }
-
-            public void setQuestion(){
-                state = QUESTION;
+                isKnown = true;
             }
 
             public void setContent(int c){
@@ -182,8 +178,8 @@ public class ClassicGame {
                 return content;
             }
 
-            public int getState(){
-                return state;
+            public boolean isKnown(){
+                return isKnown;
             }
 
             public int getX(){
@@ -273,7 +269,7 @@ public class ClassicGame {
                 }else if(x == width - 1){
                     return new Cell[] {getS(), getSW(), getW(), getNW(), getN()};
                 }else if(y == height - 1){
-                    return new Cell[] {getW(), getNW(), getN(), getNW(), getE()};
+                    return new Cell[] {getW(), getNW(), getN(), getNE(), getE()};
                 }else if (x == 0) {
                     return new Cell[] {getN(), getNE(), getE(), getSE(), getS()};
                 }else{
@@ -281,25 +277,59 @@ public class ClassicGame {
                 }
             }
 
-            public void select(){
-                LinkedList<Cell> Q = new LinkedList<Cell>();
-                Q.add(this);
-                this.setKnown();
-                while (Q.size() != 0){
-                    Cell v = Q.remove();
-                    if(this.getContent() == 0) {
-                        for (Cell w : v.getNeighbors()) {
-                            if (w.getState() == UNKNOWN && w.getContent() == 0) {
-                                Q.add(w);
-                                w.setKnown();
-                            }else if(w.getContent() != 0){
-                                w.setKnown();
+            public int getMark(){
+                return mark;
+            }
+
+            //tfalse == end game : true == continue
+            public boolean select(){
+                if(this.getContent() == MINE) {
+                    return false;
+                }else{
+                    LinkedList<Cell> Q = new LinkedList<Cell>();
+                    Q.add(this);
+                    this.setKnown();
+                    while (Q.size() != 0) {
+                        Cell v = Q.remove();
+                        if (this.getContent() == 0) {
+                            for (Cell w : v.getNeighbors()) {
+                                if (w.getMark() != FLAG && w.getContent() != 9) {
+                                    if (!w.isKnown() && w.getContent() == 0) {
+                                        Q.add(w);
+                                        w.setKnown();
+                                    } else if (w.getContent() != 0) {
+                                        w.setKnown();
+                                    }
+                                    knowonCount++;
+                                }
                             }
                         }
                     }
+                    return true;
                 }
             }
 
+            public boolean toggleFlag(){
+                if(!this.isKnown()){
+                    if(this.mark != FLAG){
+                        this.mark = FLAG;
+                        flagCount++;
+                        if(this.getContent() == MINE){
+                            correctFlagCount++;
+                            if(correctFlagCount == mineCount){
+                                return false;
+                            }
+                        }
+                    }else{
+                        this.mark = UNMARKED;
+                        flagCount--;
+                        if(this.getContent() == MINE){
+                            correctFlagCount--;
+                        }
+                    }
+                }
+                return true;
+            }
         }
 
         public Cell getCell(int x, int y){
@@ -315,6 +345,14 @@ public class ClassicGame {
 
     public GameBoard getGameBoard(){
         return gameBoard;
+    }
+
+    public boolean checkWin(){
+        if(gameBoard.correctFlagCount == gameBoard.mineCount || gameBoard.knowonCount == gameBoard.width * gameBoard.height - gameBoard.mineCount){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 	public static void main(String[] args){

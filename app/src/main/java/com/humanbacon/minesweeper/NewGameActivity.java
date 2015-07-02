@@ -1,22 +1,11 @@
 package com.humanbacon.minesweeper;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.graphics.Point;
-import android.os.Build;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -40,14 +29,52 @@ public class NewGameActivity extends Activity {
         @Override
         public void onClick(View v) {
 
-            gameBoard.getCell(x, y).select();
-            for(int j = 0; j < 9; j++){
-                for(int i = 0; i < 9; i++){
-                    if(gameBoard.getCell(i, j).getState() == ClassicGame.KNOWN){
-                        tableCells[i][j].setText("" + gameBoard.getCell(i, j).getContent());
+            if (gameBoard.getCell(x, y).select()) {
+                for (int j = 0; j < 9; j++) {
+                    for (int i = 0; i < 9; i++) {
+                        if (gameBoard.getCell(i, j).isKnown()) {
+                            int content = gameBoard.getCell(i, j).getContent();
+                            if (content == 9) {
+                                tableCells[i][j].setText("x");
+                            } else {
+                                tableCells[i][j].setText("" + content);
+                            }
+                        }
                     }
                 }
+            }else {
+                if(classicGame.checkWin()){
+                    ((TextView)findViewById(R.id.winView)).setText("WIN");
+                }else{
+                    ((TextView)findViewById(R.id.winView)).setText("LOSE");
+                }
+                endGame();
             }
+        }
+    }
+
+    private class CellOnLongClickListener implements Button.OnLongClickListener{
+        int x;
+        int y;
+
+        public CellOnLongClickListener(int x, int y){
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if(gameBoard.getCell(x, y).toggleFlag()){
+                if(gameBoard.getCell(x, y).getMark() == ClassicGame.FLAG){
+                    tableCells[x][y].setText("_");
+                }else{
+                    tableCells[x][y].setText("");
+                }
+            }else{
+                ((TextView)findViewById(R.id.winView)).setText("WIN");
+                endGame();
+            }
+            return true;
         }
     }
 
@@ -70,11 +97,26 @@ public class NewGameActivity extends Activity {
                 tableCells[i][j].setLayoutParams(new TableRow.LayoutParams(110, 110));
                 tableCells[i][j].setText("");
                 tableCells[i][j].setOnClickListener(new CellOnClickListener(i, j));
+                tableCells[i][j].setOnLongClickListener(new CellOnLongClickListener(i, j));
                 row.addView(tableCells[i][j]);
             }
             row.setLayoutParams(tableParams);
             tableLayout.addView(row);
         }
-        contentView.addView(tableLayout);
+        ((RelativeLayout)findViewById(R.id.gameView)).addView(tableLayout);
+    }
+
+    public void endGame(){
+        for(int j = 0; j < 9; j++){
+            for(int i = 0; i < 9; i++){
+                gameBoard.getCell(i, j).setKnown();
+                int content = gameBoard.getCell(i, j).getContent();
+                if (content == 9) {
+                    tableCells[i][j].setText("x");
+                } else {
+                    tableCells[i][j].setText("" + content);
+                }
+            }
+        }
     }
 }
